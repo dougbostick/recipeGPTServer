@@ -54,12 +54,8 @@ app.post('/gpt', async (req, res, next) => {
 //       input: `Suggest a recipe based on these ingredients: ${ingredients}.`,
 //       encoding_format: 'float'
 //     })
-
 //     console.log('GPTOUT', GPTOutpt)
-   
-
 //     res.send(GPTOutpt)
-
 //   } catch(err){
 //     next(err)
 //   }

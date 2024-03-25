@@ -16,9 +16,10 @@ app.get('/', (req, res) => {
 
 app.post('/gpt', async (req, res, next) => {
   console.log('REQ', req.body)
+
   const ingredients = req.body.ingredientList;
   const jsonFormat = `
-    Format the response as an array where each item in the array is a recipe in the following JSON format: 
+    Format the response as an array name recipes where each item in the array is a recipe in the following JSON format: 
     {
       recipe: <title of recipe>,
       ingredients: <unordered list of required ingredients>,
@@ -29,7 +30,7 @@ app.post('/gpt', async (req, res, next) => {
       const GPTOutpt = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
-          {'role' : 'system', 'content': `You are a helpful assistant designed to suggest a list of 3-10 recipes based on available ingredients. ${jsonFormat}`},
+          {'role' : 'system', 'content': `You are a helpful assistant designed to suggest a list of 3-10 recipes based on available ingredients. If any of the provided ingredients is not recognized as food then reply with a message asking for edible ingredients. ${jsonFormat}`},
           {'role': 'user', 'content': `What kind of recipe can I make with these ingredients? ${ingredients}`},
         ],
         response_format: {"type": "json_object"}
@@ -37,30 +38,13 @@ app.post('/gpt', async (req, res, next) => {
 
     console.log('GPTOUT', GPTOutpt)
     const text = GPTOutpt.choices[0].message.content;
-    
+    console.log(text)
     res.send(text)
 
   } catch(err){
     next(err)
   }
 });
-
-// app.post('/gptembed', async (req, res, next) => {
-//   console.log('REQ', req.body)
-//   const ingredients = req.body.ingredientList;
-//   try{
-//       const GPTOutpt = await openai.embeddings.create({
-//       model: 'text-embedding-ada-002',
-//       input: `Suggest a recipe based on these ingredients: ${ingredients}.`,
-//       encoding_format: 'float'
-//     })
-//     console.log('GPTOUT', GPTOutpt)
-//     res.send(GPTOutpt)
-//   } catch(err){
-//     next(err)
-//   }
-// });
-
 
 app.listen(3001, () => {
     console.log('Express server listening on port 3001')

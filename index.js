@@ -46,7 +46,50 @@ app.post('/gpt', async (req, res, next) => {
   }
 });
 
+app.post('/gptAssist', async (req, res, next) => {
+  console.log('REQ', req.body)
+
+  const question = req.body.input;
+  const jsonFormat = `
+    JSON format: 
+    {
+      response: <response>
+    }
+  `
+  const unrelatedMessage = `JSON Response: {
+    error: <reply with your choice of text informing the use that you are only knowledgable in culinary topics>
+  }`
+
+  const incompleteQuestion = `JSON Response: {
+    error: <reply with your choice of text informing the user that was not a complete question>
+  }`
+  try{
+      const GPTOutpt = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {'role' : 'system', 'content': `You are a helpful assistant designed to suggest answer questions about food, cooking and other culinary subjects. 
+       
+          Reply to this question: ${question} in this format: ${jsonFormat}`},
+          // {'role': 'user', 'content': `${question}`},
+        ],
+        response_format: {"type": "json_object"}
+      })
+
+    console.log('GPTOUT', GPTOutpt)
+    const text = GPTOutpt.choices[0].message.content;
+    console.log(text)
+    res.send(text)
+
+  } catch(err){
+    next(err)
+  }
+});
+
 app.listen(3001, () => {
     console.log('Express server listening on port 3001')
 });
 
+
+
+// If you are asked an incomplete question repy with the following JSON format:${incompleteQuestion}.
+// If you are asked an unrelated question reply with the following JSON format: ${unrelatedMessage}. 

@@ -7,7 +7,9 @@ const { Configuration, OpenAI } = require('openai');
 
 const openai = new OpenAI()
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000/'
+}));
 app.use(express.json())
 
 app.get('/', (req, res) => {
@@ -19,7 +21,7 @@ app.post('/gpt', async (req, res, next) => {
 
   const ingredients = req.body.ingredientList;
   const jsonFormat = `
-    Format the response as an array name recipes where each item in the array is a recipe in the following JSON format: 
+    Format the response as an array named recipes, where each item in the array is a recipe in the following JSON format: 
     {
       recipe: <title of recipe>,
       ingredients: <unordered list of required ingredients>,
@@ -30,7 +32,8 @@ app.post('/gpt', async (req, res, next) => {
       const GPTOutpt = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
-          {'role' : 'system', 'content': `You are a helpful assistant designed to suggest a list of 3-10 recipes based on available ingredients. If any of the provided ingredients is not recognized as food then reply with a message asking for edible ingredients. ${jsonFormat}`},
+          {'role' : 'system', 'content': `You are a helpful assistant designed to suggest a list of 3-10 recipes based on available ingredients. 
+          If any of the provided ingredients is not recognized as food then reply with a message asking for edible ingredients. ${jsonFormat}`},
           {'role': 'user', 'content': `What kind of recipe can I make with these ingredients? ${ingredients}`},
         ],
         response_format: {"type": "json_object"}
